@@ -12,8 +12,6 @@
 int main()
 {
     std::cout << "Hello World!\n";
-    std::cout << "hello," << std::endl;
-    std::cout << "STRING WITH quotes \"quots\"\n";
 }
 
 
