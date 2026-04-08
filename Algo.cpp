@@ -80,31 +80,37 @@ struct water
 };
 
 //O(n^2) O(1)/O(logN) на сортировку + O(k) на результат (количество триплетов)
-struct treeSum
+struct threeSum
 {
     std::vector<std::vector<int>> threeSumWitoutAnyDublicate(std::vector<int>& nums)
     {
         std::vector<std::vector<int>> sums;
         std::sort(nums.begin(), nums.end());
-        if (nums[0] > 0 || nums.size() < 3)
+        int n = nums.size();
+        if (n < 3)
             return sums;
 
-        for (auto i = 0; i < nums.size()-2; i++)
+        for (int i = 0; i < nums.size()-2; i++)
         {
             if (nums[i] > 0) break;
             if ((i > 0) && nums[i] == nums[i - 1]) continue;
+
+            // Оптимизация 1: Если даже с двумя самыми большими числами сумма < 0, идем дальше
+                if ((long long)nums[i] + nums[n - 2] + nums[n - 1] < 0) continue;
+
+            // Оптимизация 2: Если даже с двумя следующими числами сумма > 0, выходим
+            if ((long long)nums[i] + nums[i + 1] + nums[i + 2] > 0) break;
+
             int left = i + 1;
             int right = nums.size() - 1;
             while (left < right)
             {
-                auto sum = nums[i] + nums[left] + nums[right];
+                long long sum = nums[i] + nums[left] + nums[right];
                 if (sum == 0)
                 {
                     sums.push_back({ nums[i],nums[left],nums[right] });
-                    while (left < right && nums[left] == nums[left + 1]) left++;
-                    while (left < right && nums[right] == nums[right - 1]) right--;
-                    left++;
-                    right--;
+                    while (left < right && nums[left] == nums[++left]);
+                    while (left < right && nums[right] == nums[--right]);
                 }
                 else if (sum > 0)
                     right--;
@@ -199,7 +205,7 @@ struct treeSum
 
         for (int i = 0; i < n - 3; ++i)
         {
-            if (i > 0 && nums[i] == nums[i + 1]) continue;
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
             if ((long long)nums[i] + nums[i + 1] + nums[i + 2] + nums[i + 3] > target) break;
             if ((long long)nums[i] + nums[n - 1] + nums[n - 2] + nums[n - 3] < target) continue;
 
@@ -233,6 +239,178 @@ struct treeSum
             }
         }
         return result;
+    }
+};
+
+struct nthEndOfList
+{
+
+    struct ListNode
+    {
+        int val;
+        ListNode* next;
+
+        ListNode() : val(0), next(nullptr) {};
+        ListNode(int x) : val(x), next(nullptr) {};
+    };
+
+    ListNode* removeNthFromEnf(ListNode* head, int n)
+    {
+        if (head == nullptr) return head;
+        ListNode prev(0);
+        prev.next = head;
+
+        ListNode* fast = &prev;
+        ListNode* slow = &prev;
+
+        for (int i = 0; i < n; ++i)
+        {
+            if (fast->next)
+                fast = fast->next;
+            else if (i != n - 1)
+                return head;
+        }
+
+        while (fast->next != nullptr)
+        {
+            fast = fast->next;
+            slow = slow->next;
+        }
+
+        ListNode* toDelete = slow->next;
+        slow->next = slow->next->next;
+        delete toDelete;
+
+        return prev.next;
+    }
+
+    void func()
+    {
+        auto first = new ListNode(1);
+        first->next = new ListNode(2);
+        first->next->next = new ListNode(3);
+        first->next->next->next = new ListNode(4);
+
+        auto second = new ListNode(1);
+        auto third = new ListNode(1);
+        third->next = new ListNode(2);
+
+        std::vector<ListNode*> vec{ first,second,third };
+        auto lambda = [](auto& vect)
+            {
+                for (auto ptr : vect)
+                {
+                    while (ptr != nullptr)
+                    {
+                        std::cout << ptr->val;
+                        ptr = ptr->next;
+                    }
+                    std::cout << std::endl;
+                }
+            };
+        lambda(vec);
+        std::vector<ListNode*> vec1{ removeNthFromEnf(first, 2),
+            removeNthFromEnf(second, 1),
+            removeNthFromEnf(third, 1) };
+        lambda(vec1);
+
+        for (auto head : vec1) {
+            while (head != nullptr) {
+                ListNode* next = head->next;
+                delete head;
+                head = next;
+            }
+        }
+    }
+};
+
+struct easyTwo{
+    int removeDuplicatesWithSave(std::vector<int>& nums)
+    {
+        if (nums.empty()) return 0;
+
+        int fast = 1;
+        int slow = 0;
+
+        while (fast < nums.size())
+        {
+            if (nums[slow] <= nums[fast])
+                fast++;
+            else
+            {
+                if (nums[slow + 1] <= nums[slow])
+                {
+                    slow++;
+                    std::swap(nums[slow], nums[fast]);
+                    fast++;
+                }
+                else
+                {
+                    fast++;
+                    slow++;
+                }
+            }
+        }
+        return slow + 1;
+    }
+
+    int removeDuplicates(std::vector<int>& nums)
+    {
+        if (nums.empty()) return 0;
+        int slow = 0;
+        for (int fast = 1; fast < nums.size(); ++fast)
+        {
+            if (nums[fast] != nums[slow])
+            {
+                slow++;
+                nums[slow] = nums[fast];
+            }
+        }
+
+        return slow + 1;
+    }
+
+    int removeDuplicatesNoMoreTwo(std::vector<int>& nums) {
+        if (nums.size() <= 2) return nums.size();
+
+        int slow = 2; // Первые два элемента оставляем в любом случае
+        for (int fast = 2; fast < nums.size(); ++fast) {
+            // Если текущее число не равно тому, что стоит через одно от slow
+            if (nums[fast] != nums[slow - 2]) {
+                nums[slow] = nums[fast];
+                slow++;
+            }
+        }
+        return slow;
+    }
+
+    int removeElement(std::vector<int>& nums, int val) {
+        int i = 0;
+        int n = nums.size(); // Используем размер, а не последний индекс
+
+        while (i < n) {
+            if (nums[i] == val) {
+                // Просто берем последний элемент и ставим на место текущего
+                nums[i] = nums[n - 1];
+                // Уменьшаем размер, но НЕ увеличиваем i, 
+                // так как новый элемент в nums[i] тоже может быть равен val
+                n--;
+            }
+            else {
+                i++;
+            }
+        }
+        return n;
+    }
+
+    int removeElementLow(std::vector<int>& nums, int val) {
+        int k = 0;
+        for (int x : nums) {
+            if (x != val) {
+                nums[k++] = x;
+            }
+        }
+        return k;
     }
 
 };

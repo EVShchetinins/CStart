@@ -29,10 +29,6 @@ void func_of_size_and_spesific()
     //std::cout << "c2 =" << c2 << std::endl;
     std::wcout << "c2 =" << c2 << std::endl;
 
-    std::string str = "kek";
-    std::cout << str << std::endl;
-    std::cout << sizeof(str) << std::endl;
-
     //mass
     int nums[3];
     nums[0] = 5;
@@ -65,6 +61,23 @@ void func_of_size_and_spesific()
     std::cout << "El" << dnum[0] << std::endl;
 
     //string
+
+    std::string str = "kek";
+    std::cout << str << std::endl;
+    std::cout << sizeof(str) << std::endl; //буфер + указатель + size + capacity
+    // јдрес самого объекта (управл€ющей структуры)
+    void* obj_addr = &str;
+    // јдрес первого символа данных
+    void* data_addr = (void*)str.data();
+
+    std::cout << "Object address: " << obj_addr << std::endl;
+    std::cout << "Data address:   " << data_addr << std::endl;
+
+    if (data_addr >= obj_addr && data_addr < (char*)obj_addr + sizeof(str))
+        std::cout << "Result: Data is INSIDE the object (SSO / Stack)" << std::endl;
+    else
+        std::cout << "Result: Data is OUTSIDE (Heap)" << std::endl;
+
     char word[] = "Hi!";
     char word1[] = { 'H','Y','!' };
     for (auto i = 0; i < 3; ++i)
@@ -73,13 +86,15 @@ void func_of_size_and_spesific()
         std::cout << word1[i];
     }
     std::string name = "Pokki";
-    std::ranges::for_each(name, [](auto a) {std::cout << a;});
+    std::ranges::for_each(name, [](auto a) {std::cout << a; });
 
     auto lenS = name.length();
     auto lenS1 = name.size();
     bool iseS = name.empty();
     auto newname = name.append("text");
     auto subname = name.substr(0, 5);
+    name.assign(subname);
+    int copstr = name.compare(subname);
     subname.clear();
     name.push_back('!');
     int scor = 500;
@@ -89,7 +104,7 @@ void func_of_size_and_spesific()
     auto indstr = newname.find("P");
     if (indstr != std::string::npos)
     {
-        newname.replace(indstr, 1, {"pop"});
+        newname.replace(indstr, 1, { "pop" });
         newname.erase(indstr, 1);
     }
     auto cname = newname.c_str();
